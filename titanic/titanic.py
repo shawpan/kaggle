@@ -5,16 +5,22 @@ from sklearn.svm import SVC, LinearSVC
 
 train_data = pd.read_csv("data/train.csv")
 test_data = pd.read_csv("data/test.csv")
-drop_columns = ['PassengerId', 'Cabin', 'Age', 'Embarked', 'Name', 'Sex', 'Ticket', 'Fare']
+drop_columns = ['PassengerId', 'Cabin', 'Age', 'Embarked', 'Name', 'Ticket', 'Fare']
 
 print("Training data: ")
 print(train_data.info())
 print("Test data: ")
 print(test_data.info())
 
+def transform_sex_column(data):
+    data['Sex'] = data['Sex'].apply(lambda x: 1 if x.lower() == "male" else 0)
+
+    return data
+
 def prepare_train_data():
     # Remove PassengerId column, obviously unnecessary
     x_train = train_data.drop(drop_columns, axis=1)
+    x_train = transform_sex_column(x_train)
     x_train = x_train.drop(['Survived'], axis=1)
     y_train = train_data['Survived']
 
@@ -22,6 +28,7 @@ def prepare_train_data():
 
 def prepare_test_data():
     x_test = test_data.drop(drop_columns,axis=1).copy()
+    x_test = transform_sex_column(x_test)
 
     return x_test
 
@@ -45,5 +52,5 @@ if __name__ == "__main__":
     x_train, y_train = prepare_train_data()
     x_test = prepare_test_data()
     y_test, score = run_svm(x_train, y_train, x_test)
-    print("Score: ", score)
+    print("Accuracy Score: ", score)
     write_result(y_test)
